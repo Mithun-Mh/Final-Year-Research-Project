@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "RubberEX",
+    "slug": "RubberEX",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/launch_screen.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/launch_screen.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#000a1a"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/launch_screen.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.CAMERA"
+      ],
+      "package": "com.anonymous.rubberintelligenceapp",
+      "usesCleartextTraffic": true
+    },
+    "web": {
+      "favicon": "./assets/launch_screen.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-barcode-scanner",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you select images for disease detection analysis.",
+          "cameraPermission": "The app uses the camera to capture photos for disease detection analysis."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow RubberIntelligence to save the Digital Product Passport QR tag to your photo gallery.",
+          "savePhotosPermission": "Allow RubberIntelligence to save the Digital Product Passport QR tag.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ]
+    ]
+  }
+}

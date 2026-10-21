@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RubberIntelligence.Backend", "RubberIntelligence.Backend", "{3E1E9CEC-C362-8643-B724-DC7ABE6B5B62}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubberIntelligence.API", "RubberIntelligence.Backend\RubberIntelligence.API\RubberIntelligence.API.csproj", "{DF8123EA-66B2-C7FA-4736-42FC95A7E0A7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF8123EA-66B2-C7FA-4736-42FC95A7E0A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF8123EA-66B2-C7FA-4736-42FC95A7E0A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF8123EA-66B2-C7FA-4736-42FC95A7E0A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF8123EA-66B2-C7FA-4736-42FC95A7E0A7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DF8123EA-66B2-C7FA-4736-42FC95A7E0A7} = {3E1E9CEC-C362-8643-B724-DC7ABE6B5B62}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7844EFC2-88A4-41E2-BB07-7EAAA9E6D650}
+	EndGlobalSection
+EndGlobal

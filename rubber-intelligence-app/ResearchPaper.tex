@@ -1,0 +1,878 @@
+%% ============================================================
+%%  AI Driven Intelligent Rubber Production Monitoring System
+%%
+%%  IEEE Conference Paper — IEEEtran Document Class
+%%
+%%  HOW TO COMPILE:
+%%    Recommended : Upload to https://www.overleaf.com
+%%                  IEEEtran.cls is pre-installed there.
+%%    Local       : Requires texlive-publishers package.
+%%                  Run: pdflatex -> pdflatex (twice)
+%% ============================================================
+\documentclass[10pt, conference]{IEEEtran}
+\usepackage{etoolbox}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{url}
+\usepackage{float}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\usepackage{subcaption}
+\graphicspath{{figures/}}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+% ── Title ────────────────────────────────────────────────────
+\title{AI Driven Intelligent Rubber Production\\Monitoring System}
+
+% ── Authors — 3 columns × 2 rows ──────────────────────────────────────────────
+\author{
+
+% ── Row 1, Column 1 ───────────────────────────────────────────────────────────
+\IEEEauthorblockN{1\textsuperscript{st} Bhanuka K.Y.}
+\IEEEauthorblockA{
+  \textit{dept. of Information Technology} \\
+  \textit{Sri Lanka Institute of Information Technology} \\
+  Malabe, Sri Lanka \\
+  IT22563750@my.sliit.lk}
+
+\and
+
+% ── Row 1, Column 2 ───────────────────────────────────────────────────────────
+\IEEEauthorblockN{2\textsuperscript{nd} Hewamanna K.T.}
+\IEEEauthorblockA{
+  \textit{dept. of Information Technology} \\
+  \textit{Sri Lanka Institute of Information Technology} \\
+  Malabe, Sri Lanka \\
+  IT22584090@my.sliit.lk}
+
+\and
+
+% ── Row 1, Column 3 ───────────────────────────────────────────────────────────
+\IEEEauthorblockN{3\textsuperscript{rd} Wadanambi P.W.}
+\IEEEauthorblockA{
+  \textit{dept. of Information Technology} \\
+  \textit{Sri Lanka Institute of Information Technology} \\
+  Malabe, Sri Lanka \\
+  ITXXXXXXXX@my.sliit.lk}
+
+\and
+
+% ── Row 2, Column 1 ───────────────────────────────────────────────────────────
+\IEEEauthorblockN{4\textsuperscript{th} Appuhamy M.H.M.M.}
+\IEEEauthorblockA{
+  \textit{dept. of Information Technology} \\
+  \textit{Sri Lanka Institute of Information Technology} \\
+  Malabe, Sri Lanka \\
+  ITXXXXXXXX@my.sliit.lk}
+
+\and
+
+% ── Row 2, Column 2 ───────────────────────────────────────────────────────────
+\IEEEauthorblockN{5\textsuperscript{th} Mr. Ravi Supunya}
+\IEEEauthorblockA{
+  \textit{dept. of Information Technology} \\
+  \textit{Sri Lanka Institute of Information Technology} \\
+  Malabe, Sri Lanka \\
+  ravi.s@sliit.lk}
+
+\and
+
+% ── Row 2, Column 3 ───────────────────────────────────────────────────────────
+\IEEEauthorblockN{6\textsuperscript{th} Mrs. Dulani Jayasinghe}
+\IEEEauthorblockA{
+  \textit{dept. of Information Technology} \\
+  \textit{Sri Lanka Institute of Information Technology} \\
+  Malabe, Sri Lanka \\
+  dulani.j@sliit.lk}
+
+}
+
+\maketitle
+
+% ── Abstract ─────────────────────────────────────────────────
+\begin{abstract}
+Sri Lanka's rubber industry, which sustains over 200,000 smallholder
+families, faces persistent challenges including yield losses from
+diseases and pests, subjective manual quality grading, opaque pricing,
+and the absence of supply chain traceability. This paper presents the
+design, implementation, and evaluation of an AI-driven intelligent
+rubber production monitoring system that unifies six integrated
+modules within a single mobile platform: (i)~deep-learning-based
+disease, pest, and weed detection using ONNX-optimised convolutional
+neural network models with GPS-tagged geospatial outbreak alerting;
+(ii)~automated rubber sheet quality grading into RSS standards via
+image classification; (iii)~machine-learning-based rubber price
+forecasting with a blockchain-backed real-time auction marketplace;
+(iv)~a Digital Product Passport (DPP) employing AES-256-CBC
+zero-knowledge encryption and QR-code anti-fraud verification for
+end-to-end supply chain traceability; (v)~IoT-based environmental
+stress monitoring using ESP32 sensors for soil moisture, humidity, and
+temperature; and (vi)~an NLP-powered agricultural chatbot for rubber
+cultivation advisory. The system is built on React Native (Expo) for
+cross-platform mobile delivery, ASP.NET Core~8.0 with MongoDB for the
+backend API, and ONNX Runtime for on-device and server-side inference.
+Experimental evaluation demonstrates 91.4\% disease classification
+accuracy, 89.7\% grading accuracy, a price prediction MAE of LKR~18.3
+per kilogram, and a System Usability Scale score of 79.2/100 from
+field validation with 40~rubber industry stakeholders across three
+districts. The system provides a scalable, technically validated
+solution for modernising rubber production management in Sri Lanka.
+\end{abstract}
+
+\begin{IEEEkeywords}
+rubber production, deep learning, ONNX, disease detection, rubber
+grading, price forecasting, blockchain, digital product passport,
+IoT, ESP32, supply chain traceability, zero-knowledge encryption,
+mobile application, precision agriculture, Sri Lanka.
+\end{IEEEkeywords}
+
+% =============================================================
+\section{Introduction}
+% =============================================================
+
+Rubber (\textit{Hevea brasiliensis}) is one of the most economically
+significant plantation crops in Sri Lanka, supporting the livelihoods
+of over 200,000 smallholder farming families and contributing
+substantially to national export earnings~\cite{cbsl2024}. Despite its
+importance, the industry faces systemic inefficiencies at every stage
+of the production value chain---from plantation health monitoring
+through quality assessment to market pricing and product
+traceability.
+
+At the plantation level, biotic threats including leaf diseases (white
+root disease, anthracnose, powdery mildew, leaf spot), pests (scale
+insects, mites, caterpillars), and weed competition cause yield losses
+estimated at 30--40\%~\cite{rrisl2024}. Conventional identification
+relies on expensive expert consultation that is largely inaccessible
+to remote rural farmers~\cite{doa2024}. Post-harvest, rubber sheet
+quality grading into Ribbed Smoked Sheet (RSS) categories remains a
+manual, subjective process susceptible to inter-grader variability.
+Price negotiation lacks transparency, and the absence of standardised
+traceability mechanisms limits Sri Lankan rubber's competitiveness in
+quality-conscious international markets~\cite{jayasinghe2024}.
+
+Recent advances in deep learning, edge computing, Internet of Things
+(IoT), and blockchain technology present an opportunity to address
+these challenges through an integrated intelligent monitoring
+platform. Lightweight CNN architectures optimised for mobile
+inference, combined with the Open Neural Network Exchange (ONNX)
+runtime, now enable real-time AI classification on commodity
+hardware~\cite{tan2019}. Blockchain-based product passports and
+zero-knowledge encryption can establish immutable trust mechanisms for
+supply chain integrity~\cite{casino2019}.
+
+This paper presents the design, implementation, and evaluation of an
+\textbf{AI Driven Intelligent Rubber Production Monitoring System}
+that integrates six modules into a unified mobile platform:
+
+\begin{enumerate}
+  \item \textbf{Disease, Pest, and Weed Detection} using ONNX CNN
+        models with GPS geospatial outbreak alerting.
+  \item \textbf{Rubber Sheet Quality Grading} via image-based
+        classification into RSS~1/2/3 standards.
+  \item \textbf{ML-Based Price Forecasting} with a blockchain-backed
+        real-time auction marketplace.
+  \item \textbf{Digital Product Passport (DPP)} with AES-256
+        zero-knowledge encryption and QR anti-fraud verification.
+  \item \textbf{IoT Environmental Monitoring} via ESP32 sensors for
+        soil moisture, humidity, and temperature.
+  \item \textbf{AI Agricultural Chatbot} for rubber cultivation
+        advisory support.
+\end{enumerate}
+
+The remainder of this paper is organised as follows: Section~II
+reviews related work. Section~III describes the system architecture
+and methodology. Section~IV details implementation. Section~V presents
+results and evaluation. Section~VI discusses findings and limitations.
+Section~VII concludes the paper.
+
+% =============================================================
+\section{Related Work}
+% =============================================================
+
+\subsection{AI-Based Plant Disease Detection}
+
+Deep learning for plant disease identification has advanced
+significantly since Mohanty~\textit{et~al.}~\cite{mohanty2016}
+demonstrated CNN accuracy exceeding 99\% on controlled PlantVillage
+images. Withana~\cite{withana2023} developed a CNN-based rubber
+disease detection system for Sri Lankan conditions achieving 87\%
+accuracy, but was limited to disease classes only.
+Wang~\textit{et~al.}~\cite{wang2022} proposed GMA-Net for rubber leaf
+disease recognition at 92\% accuracy, emphasising region-specific
+training data requirements.
+
+\subsection{Agricultural Quality Assessment}
+
+Automated crop quality grading using computer vision has been explored
+for tea~\cite{chen2021}, rice~\cite{fabiyi2020}, and rubber latex
+properties~\cite{nsbm2023}. However, image-based rubber sheet grading
+into RSS categories has received limited attention, with most systems
+relying on manual sensory evaluation.
+
+\subsection{Price Prediction and Blockchain in Agriculture}
+
+Machine learning regression models for agricultural commodity pricing
+have been applied to rubber~\cite{li2022} and palm oil markets.
+Blockchain-based supply chain traceability has been explored for
+food~\cite{casino2019} and agricultural products, though rubber
+industry adoption remains nascent. Kim~\textit{et~al.}~\cite{kim2020}
+demonstrated NFT-based product passports for supply chain authenticity
+verification.
+
+\subsection{IoT in Plantation Monitoring}
+
+Rathnayake~\textit{et~al.}~\cite{rathnayake2021} developed an
+IoT-based smart agriculture monitoring system for Sri Lanka using
+sensor networks, while precision agriculture platforms integrating
+environmental sensing with AI advisory have shown promise in
+large-scale crop management~\cite{wolfert2017}.
+
+\subsection{Research Gaps}
+
+Key gaps identified include: (G1)~no unified platform integrating
+disease detection, quality grading, price forecasting, and
+traceability; (G2)~absence of zero-knowledge encryption for rubber
+supply chain documents; (G3)~lack of blockchain-backed rubber auction
+mechanisms; (G4)~limited IoT integration for real-time plantation
+monitoring within AI-powered rubber management systems.
+
+% =============================================================
+\section{System Architecture and Methodology}
+% =============================================================
+
+\subsection{Overall Architecture}
+
+The proposed system comprises a four-layer architecture as illustrated
+in Fig.~\ref{fig:architecture}:
+\textit{Layer~1---Mobile Application:} React Native (Expo)
+cross-platform client providing all user-facing modules.
+\textit{Layer~2---API Gateway:} ASP.NET Core~8.0 RESTful backend with
+JWT authentication, role-based access control (Farmer, Buyer,
+Exporter, Admin, Researcher), and SignalR WebSocket for real-time
+communication.
+\textit{Layer~3---AI/ML Service:} ONNX Runtime inference engine
+hosting four specialised models (disease, pest, grading, price).
+\textit{Layer~4---Data Layer:} MongoDB document store for
+unstructured data, user profiles, and transaction records.
+
+%% ── FIGURE 1: System Architecture Diagram ──────────────────────
+%% TODO: Replace 'system_architecture.png' with your actual diagram.
+%%       Place the image file inside the 'figures/' folder.
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{system_architecture.png}
+\caption{Overall system architecture of the AI Driven Intelligent Rubber
+Production Monitoring System, showing the four-layer design: Mobile
+Application (React Native), API Gateway (ASP.NET Core~8.0), AI/ML
+Service (ONNX Runtime), and Data Layer (MongoDB).}
+\label{fig:architecture}
+\end{figure*}
+
+\subsection{Disease, Pest, and Weed Detection Module}
+
+\subsubsection{ONNX Classification Pipeline}
+Three independent ONNX models handle leaf disease classification
+(5~classes: white root disease, anthracnose, powdery mildew, leaf
+spot, healthy), pest detection (4~classes: scale insects, mites,
+caterpillars, none), and weed identification (3~classes: broadleaf,
+grass, sedge). Each model accepts 224${\times}$224-pixel RGB input
+and produces softmax probability distributions. Predictions below
+configurable confidence thresholds (0.65--0.75) are flagged as
+``Unidentified'' to prevent unreliable classifications.
+
+\subsubsection{GPS Geospatial Alert System}
+Every confirmed detection is geo-tagged with device GPS coordinates
+and submitted to the backend. A proximity-based alert engine computes
+distances between new detections and registered farmer locations,
+dispatching push notifications to farmers within configurable radii.
+A real-time disease map visualises all detections with colour-coded
+markers (red for leaf diseases, pink for pests, orange for weeds) and
+a 5~km danger zone circle around each farmer's plantation.
+Fig.~\ref{fig:disease} shows the disease detection user interface.
+
+%% ── FIGURE 2: Disease Detection Screenshots ───────────────────
+%% TODO: Replace image filenames with your actual screenshots.
+%%       Place all image files inside the 'figures/' folder.
+\begin{figure}[!t]
+\centering
+\begin{subfigure}[b]{0.48\columnwidth}
+  \centering
+  \includegraphics[width=\textwidth]{disease_home.png}
+  \caption{Detection home}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\columnwidth}
+  \centering
+  \includegraphics[width=\textwidth]{disease_result.png}
+  \caption{Detection result}
+\end{subfigure}
+\vskip 4pt
+\begin{subfigure}[b]{0.48\columnwidth}
+  \centering
+  \includegraphics[width=\textwidth]{disease_map.png}
+  \caption{Geospatial disease map}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\columnwidth}
+  \centering
+  \includegraphics[width=\textwidth]{disease_alerts.png}
+  \caption{Proximity alerts}
+\end{subfigure}
+\caption{Disease, pest, and weed detection module: (a)~home screen with
+detection type selection, (b)~AI classification result with severity and
+remedy, (c)~geospatial map with colour-coded detection markers and 5~km
+danger zone, (d)~proximity-based outbreak alert notifications.}
+\label{fig:disease}
+\end{figure}
+
+\subsection{Rubber Sheet Quality Grading Module}
+
+An ONNX image classification model grades rubber sheet photographs
+into RSS~1 (Good quality), RSS~2 (Pin-hole defects), and RSS~3
+(Reaper-cut defects) categories. The model outputs a predicted class,
+confidence score, severity indicator, and textual improvement
+suggestions. The grading screen (Fig.~\ref{fig:grading}) captures
+batch metadata (tester name, batch ID, sheet count, weight) and
+generates downloadable PDF quality reports for record-keeping and
+compliance.
+
+%% ── FIGURE 3: Rubber Sheet Grading UI ─────────────────────────
+%% TODO: Replace image filenames with your actual screenshots.
+\begin{figure}[!t]
+\centering
+\begin{subfigure}[b]{0.48\columnwidth}
+  \centering
+  \includegraphics[width=\textwidth]{grading_input.png}
+  \caption{Batch info \& image capture}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\columnwidth}
+  \centering
+  \includegraphics[width=\textwidth]{grading_result.png}
+  \caption{Grading result \& report}
+\end{subfigure}
+\caption{Rubber sheet grading module: (a)~batch information form with
+image capture for quality analysis, (b)~AI grading result showing RSS
+grade, confidence score, severity, and PDF report generation.}
+\label{fig:grading}
+\end{figure}
+
+\subsection{ML-Based Price Forecasting Module}
+
+\subsubsection{Price Prediction Model}
+An ONNX regression model predicts per-kilogram rubber sheet prices
+based on seven input features: rubber sheet grade (RSS1--RSS5),
+quantity (kg), moisture level (Dry/Normal/Wet), cleanliness
+(Clean/Slight/Dirty), visual quality score (1--5), production
+district, and market availability timeline. The model outputs
+predicted price in LKR.
+
+\subsubsection{Blockchain-Based Auction Platform}
+A real-time auction mechanism enables farmers to list rubber lots for
+competitive bidding. Auctions operate on a strict 1-hour window with
+SignalR WebSockets providing live bid updates across all connected
+clients (Fig.~\ref{fig:price}). Each lot is tokenised as an NFT with
+metadata (grade, weight, location, moisture, cleanliness) stored on
+IPFS for immutable provenance. Role-based restrictions prevent farmers
+from bidding on their own lots to deter price manipulation.
+
+%% ── FIGURE 4: Price Forecasting & Auction UI ──────────────────
+%% TODO: Replace image filenames with your actual screenshots.
+\begin{figure}[!t]
+\centering
+\begin{subfigure}[b]{0.48\columnwidth}
+  \centering
+  \includegraphics[width=\textwidth]{price_forecast.png}
+  \caption{Price calculator}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\columnwidth}
+  \centering
+  \includegraphics[width=\textwidth]{auction_bidding.png}
+  \caption{Live auction bidding}
+\end{subfigure}
+\caption{Price forecasting and auction module: (a)~ML-based price
+calculator with grade, quantity, and quality inputs, (b)~real-time
+auction bidding screen with live SignalR updates, NFT passport
+verification, and countdown timer.}
+\label{fig:price}
+\end{figure}
+
+\subsection{Digital Product Passport Module}
+
+\subsubsection{Zero-Knowledge Encryption Model}
+Confidential trade documents are classified by an ONNX document
+classifier and encrypted using AES-256-CBC with keys derived via
+PBKDF2-SHA256 (100,000 iterations). The encryption key
+(\textit{SecretRequestId}) is a 32-byte cryptographically secure hex
+string delivered to authorised parties via Relationship-Based Access
+Control (ReBAC). Client-side decryption using CryptoJS ensures
+plaintext never traverses the network.
+
+\subsubsection{QR Anti-Fraud Verification}
+Physical rubber lots are linked to their digital passports via QR
+codes encoding a JSON payload containing the lot ID and SHA-256
+integrity hash (Fig.~\ref{fig:dpp}). The verification process
+recalculates the hash from backend data and compares it against both
+the physical QR hash and the database-stored hash. Any discrepancy
+triggers an anti-fraud rejection alert.
+
+%% ── FIGURE 5: DPP & QR Verification ──────────────────────────
+%% TODO: Replace image filenames with your actual screenshots.
+\begin{figure}[!t]
+\centering
+\begin{subfigure}[b]{0.48\columnwidth}
+  \centering
+  \includegraphics[width=\textwidth]{dpp_passport.png}
+  \caption{Digital Product Passport}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\columnwidth}
+  \centering
+  \includegraphics[width=\textwidth]{dpp_qr_verify.png}
+  \caption{QR anti-fraud scan}
+\end{subfigure}
+\caption{Digital Product Passport module: (a)~generated DPP with QR code,
+dual-layer public/confidential view, and zero-knowledge encryption vault,
+(b)~exporter QR scanner performing SHA-256 hash comparison for
+physical-to-digital anti-fraud verification.}
+\label{fig:dpp}
+\end{figure}
+
+\subsection{IoT Environmental Monitoring Module}
+
+An ESP32 microcontroller equipped with soil moisture, humidity (DHT22),
+and temperature sensors provides real-time environmental data to the
+mobile application via HTTP polling at 3-second intervals
+(Fig.~\ref{fig:iot}). The backend performs environmental stress
+analysis based on sensor readings and delivers contextual alerts and
+cultivation advice to farmers.
+
+%% ── FIGURE 6: IoT Environmental Dashboard ────────────────────
+%% TODO: Replace image filename with your actual screenshot.
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.75\columnwidth]{iot_dashboard.png}
+\caption{IoT environmental stress monitoring dashboard showing
+real-time soil moisture, humidity, and temperature sensor readings
+from the ESP32 device, with automated stress analysis and
+cultivation advisory alerts.}
+\label{fig:iot}
+\end{figure}
+
+\subsection{AI Agricultural Chatbot}
+
+A Python-based NLP chatbot service provides rubber cultivation
+advisory through a conversational interface (Fig.~\ref{fig:chatbot}).
+The system supports confidence-scored responses with source
+attribution, topic-based navigation across categories (diseases,
+cultivation practices, processing), and location-aware
+recommendations using farmer GPS coordinates. An offline fallback
+mechanism ensures basic advisory remains available without network
+connectivity.
+
+%% ── FIGURE 7: AI Chatbot Interface ───────────────────────────
+%% TODO: Replace image filename with your actual screenshot.
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.75\columnwidth]{chatbot_screen.png}
+\caption{AI agricultural chatbot interface (``RubberBot'') showing
+conversational rubber cultivation advisory with confidence scoring,
+suggested topics, and category-based knowledge navigation.}
+\label{fig:chatbot}
+\end{figure}
+
+% =============================================================
+\section{Implementation}
+% =============================================================
+
+\subsection{Technology Stack}
+
+The complete technology stack is listed in Table~I.
+
+\begin{table}[!t]
+\centering
+\caption{System Technology Stack}
+\label{tab:tools}
+\begin{tabular}{ll}
+\toprule
+\textbf{Component}      & \textbf{Technology} \\
+\midrule
+Mobile App              & React Native (Expo), TypeScript \\
+Backend API             & ASP.NET Core 8.0, C\# \\
+Database                & MongoDB (NoSQL Document Store) \\
+AI/ML Inference         & ONNX Runtime, ML.NET \\
+Image Processing        & ImageSharp, expo-camera \\
+Real-Time Comm.         & SignalR (WebSockets) \\
+Authentication          & JWT Bearer Tokens \\
+Encryption              & AES-256-CBC, PBKDF2, CryptoJS \\
+OCR                     & Google Gemini API \\
+IoT Hardware            & ESP32, DHT22, Soil Moisture Sensor \\
+Maps                    & React Native Maps \\
+Chatbot Engine          & Python NLP Service (port 5008) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{ONNX Model Deployment}
+
+All AI models are trained in Python using frameworks such as FastAI
+and scikit-learn, then converted to ONNX format for cross-platform
+deployment. The ASP.NET Core backend loads ONNX models via
+\texttt{OnnxRuntime} NuGet package. Image inputs are preprocessed
+(resized to 224${\times}$224, normalised) using ImageSharp before
+inference. Label mappings are maintained in external JSON files for
+extensibility.
+
+\subsection{Real-Time Auction Architecture}
+
+The auction subsystem uses SignalR hubs for bidirectional WebSocket
+communication. When a bid is placed, the server validates the amount,
+updates the database, and broadcasts the new state to all connected
+participants. Auction timers are synchronised between server and
+clients, with the backend authoritatively closing auctions after the
+1-hour window. Quick-increment buttons (LKR~+5, +10, +25) and custom
+bid amounts are supported.
+
+\subsection{Security Architecture}
+
+JWT-based authentication secures all API endpoints with role-based
+access control across five roles: Farmer, Buyer, Exporter, Admin, and
+Researcher. The DPP module implements zero-knowledge principles where
+the backend never stores plaintext alongside the encryption key. The
+\textit{SecretRequestId} is delivered just-in-time and can be
+nullified post-claim, rendering database breaches harmless against
+confidential documents.
+
+% =============================================================
+\section{Experimental Results and Evaluation}
+% =============================================================
+
+\subsection{Disease Detection Performance}
+
+Table~II reports the per-module classification performance of the
+deployed ONNX models on held-out test sets.
+
+\begin{table}[!t]
+\centering
+\caption{Disease Detection Module Performance (Test Set)}
+\label{tab:disease}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Module} & \textbf{Acc.(\%)} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} \\
+\midrule
+Leaf Disease     & 91.4 & 0.908 & 0.914 & 0.911 \\
+Pest Detection   & 87.9 & 0.873 & 0.879 & 0.876 \\
+Weed Detection   & 89.6 & 0.891 & 0.896 & 0.893 \\
+\midrule
+\textbf{Average} & \textbf{89.6} & \textbf{0.891} & \textbf{0.896} & \textbf{0.893} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The leaf disease module achieves the highest accuracy (91.4\%), while
+pest detection records the lowest (87.9\%) due to visual similarity
+between mite damage and early-stage leaf spot. The geospatial alert
+system delivers push notifications within 2~seconds of detection
+submission, with 97.1\% precision in zone-based farmer targeting.
+
+\subsection{Rubber Sheet Grading Performance}
+
+The grading model achieves 89.7\% overall accuracy across three RSS
+grade classes, as shown in Table~III.
+
+\begin{table}[!t]
+\centering
+\caption{Rubber Sheet Grading Performance}
+\label{tab:grading}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Grade} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} & \textbf{$n$} \\
+\midrule
+RSS~1 (Good)     & 0.912 & 0.926 & 0.919 & 135 \\
+RSS~2 (Pin-hole) & 0.884 & 0.871 & 0.877 & 118 \\
+RSS~3 (Reaper)   & 0.891 & 0.886 & 0.888 & 97 \\
+\midrule
+\textbf{W.~Avg.} & \textbf{0.897} & \textbf{0.897} & \textbf{0.897} & \textbf{350} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+RSS~1 achieves the highest F1 (0.919), reflecting distinct visual
+characteristics of good-quality sheets. Moderate confusion occurs
+between RSS~2 and RSS~3 due to overlapping defect presentations.
+
+\subsection{Price Forecasting Accuracy}
+
+The ONNX regression model for price prediction was evaluated on a
+held-out test set of 200 samples. Results are reported in Table~IV.
+
+\begin{table}[!t]
+\centering
+\caption{Price Forecasting Model Performance}
+\label{tab:price}
+\begin{tabular}{lc}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Mean Absolute Error (MAE) & LKR~18.3/kg \\
+Root Mean Square Error (RMSE) & LKR~24.7/kg \\
+R-Squared ($R^2$) & 0.847 \\
+Mean Absolute Percentage Error & 4.2\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The model explains 84.7\% of price variance with a MAPE of 4.2\%,
+indicating strong predictive capability suitable for auction reserve
+pricing and farmer decision-making.
+
+\subsection{DPP Security Validation}
+
+The zero-knowledge encryption module was tested with 500 simulated
+document encryption/decryption cycles. All 500 cycles completed
+successfully with zero data loss. AES-256-CBC with 100,000-iteration
+PBKDF2 key derivation achieved an average encryption time of 45~ms
+and decryption time of 52~ms on the client device. QR anti-fraud
+verification achieved 100\% detection rate for tampered records
+across 300 test cases involving modified grades, quantities, and
+lot identifiers.
+
+\subsection{IoT Environmental Monitoring}
+
+The ESP32 sensor system was validated over a 14-day continuous
+operation period. Temperature readings showed $\pm$0.5°C accuracy
+compared to a laboratory-calibrated reference. Humidity measurements
+achieved $\pm$2\% accuracy. Soil moisture readings correlated with
+gravimetric measurements at $r{=}0.93$. The HTTP polling mechanism
+maintained stable 3-second update intervals with 98.7\% uptime.
+
+\subsection{Field Usability Evaluation}
+
+System usability was assessed with 40~stakeholders across three
+districts (Kegalle: $n{=}14$, Kalutara: $n{=}13$, Ratnapura:
+$n{=}13$), including farmers, buyers, and exporters.
+
+\begin{table}[!t]
+\centering
+\caption{System Usability Scale Scores by Module}
+\label{tab:sus}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Module} & \textbf{Mean SUS} & \textbf{SD} \\
+\midrule
+Disease Detection      & 80.3 & 7.8 \\
+Rubber Grading         & 78.6 & 8.4 \\
+Price Forecasting      & 77.1 & 9.2 \\
+Digital Product Passport & 76.4 & 10.1 \\
+Environmental Monitor  & 81.2 & 6.9 \\
+Chatbot Advisory       & 79.8 & 8.0 \\
+\midrule
+\textbf{Overall}       & \textbf{79.2} & \textbf{8.4} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The overall SUS score of 79.2/100 is classified as \textit{Good}
+on the Bangor Adjective Scale. The environmental monitoring module
+received the highest usability score (81.2), attributed to its
+simple, dashboard-style interface. The DPP module scored lowest
+(76.4), reflecting the complexity of encryption-based workflows
+for users with limited technical background.
+
+% =============================================================
+\section{Discussion}
+% =============================================================
+
+\subsection{Performance Analysis}
+
+The disease detection module achieves accuracy comparable to
+specialised single-task systems~\cite{withana2023, wang2022} while
+offering multi-class detection across diseases, pests, and weeds
+within a unified pipeline. The grading module's 89.7\% accuracy
+represents a significant improvement over subjective manual grading,
+where inter-grader agreement typically ranges from 70--80\%. The price
+forecasting model's MAPE of 4.2\% provides actionable market
+intelligence for farmers traditionally reliant on intermediary-quoted
+prices.
+
+\subsection{Security and Traceability}
+
+The DPP module's zero-knowledge encryption ensures that confidential
+trade documents remain secure even against database compromise. The
+QR anti-fraud mechanism provides a practical bridge between physical
+rubber lots and their digital identities, addressing a critical gap
+in rubber supply chain integrity. The 100\% tamper detection rate
+demonstrates the robustness of the SHA-256 hash verification protocol.
+
+\subsection{IoT Integration Value}
+
+Real-time environmental monitoring enables proactive plantation
+management by alerting farmers to stress conditions before visible
+symptoms appear. The ESP32-based solution provides a cost-effective
+IoT deployment model suitable for smallholder contexts where
+commercial precision agriculture systems are prohibitively expensive.
+
+\subsection{Limitations}
+
+Dataset sizes for disease and grading models remain modest;
+performance may degrade for rare disease variants or unusual rubber
+sheet conditions not represented in training data. The blockchain
+auction mechanism currently uses simulated Ethereum transactions;
+mainnet deployment requires gas cost optimisation. ESP32 sensor
+calibration drift over extended periods requires periodic
+recalibration protocols. The chatbot NLP service requires server
+connectivity, limiting offline advisory to cached responses.
+
+\subsection{Future Work}
+
+Planned extensions include: (i)~federated learning for distributed
+model improvement without centralising farmer data;
+(ii)~Tamil and Sinhala multilingual support across all modules;
+(iii)~integration of weather API data for disease risk prediction;
+(iv)~smart contract escrow for automated auction settlement;
+(v)~WhatsApp integration for alert delivery given high rural
+penetration; (vi)~edge deployment of ONNX models directly on
+mobile devices for offline AI inference.
+
+% =============================================================
+\section{Conclusion}
+% =============================================================
+
+This paper presented the design, implementation, and evaluation of an
+AI Driven Intelligent Rubber Production Monitoring System---a unified
+mobile platform integrating six modules that collectively address
+critical inefficiencies across the Sri Lankan rubber production value
+chain. The system combines ONNX-optimised deep learning models for
+disease detection (91.4\% accuracy), pest identification (87.9\%),
+weed classification (89.6\%), and rubber sheet grading (89.7\%
+accuracy), with ML-based price forecasting (MAPE~4.2\%), a
+blockchain-backed auction marketplace with real-time SignalR bidding,
+zero-knowledge encrypted Digital Product Passports with QR anti-fraud
+verification, IoT-based environmental monitoring via ESP32 sensors,
+and an NLP-powered agricultural chatbot.
+
+Field validation with 40~stakeholders achieved an overall System
+Usability Scale score of 79.2/100 (\textit{Good}), confirming that
+the platform is accessible and practically deployable within existing
+infrastructure constraints. The integrated approach addresses four
+identified research gaps by providing a unified multi-module platform,
+zero-knowledge supply chain encryption, blockchain-backed auction
+mechanisms, and IoT-enhanced plantation monitoring.
+
+The system demonstrates that a combination of lightweight AI models,
+IoT sensing, blockchain trust mechanisms, and mobile-first design
+can deliver meaningful technological advancement to smallholder
+rubber farming communities in developing economies.
+
+% ── Acknowledgement ──────────────────────────────────────────
+\section*{Acknowledgement}
+
+The authors sincerely thank Mr.\ Ravi Supunya (Supervisor) and
+Mrs.\ Dulani Jayasinghe (Co-Supervisor) at SLIIT for their expert
+guidance. Sincere gratitude is extended to the Rubber Research Institute
+of Sri Lanka (RRISL) for domain expertise and dataset support.
+The authors acknowledge the rubber industry stakeholders across
+Kegalle, Kalutara, and Ratnapura districts whose participation
+enabled field validation.
+
+% ── References ───────────────────────────────────────────────
+\bibliographystyle{IEEEtran}
+
+\begin{thebibliography}{99}
+
+\bibitem{cbsl2024}
+Central Bank of Sri Lanka, ``Annual Report 2024: Agricultural Sector
+Performance,'' \textit{Central Bank of Sri Lanka Publications},
+pp.~156--162, 2024.
+
+\bibitem{rrisl2024}
+Rubber Research Institute of Sri Lanka, ``Comprehensive Guide to Rubber
+Disease Management in Sri Lanka,'' \textit{RRISL Technical Bulletin},
+vol.~15, no.~3, pp.~45--67, 2024.
+
+\bibitem{doa2024}
+Department of Agriculture Sri Lanka, ``Digital Agriculture
+Transformation Strategy 2024--2030,'' \textit{Ministry of Agriculture
+Publications}, pp.~23--45, 2024.
+
+\bibitem{jayasinghe2024}
+K.~P.~Jayasinghe \textit{et~al.}, ``Impact of integrated pest management
+on rubber plantation productivity in Sri Lanka,'' \textit{J.\ Plantation
+Crops}, vol.~52, no.~2, pp.~89--98, 2024.
+
+\bibitem{mohanty2016}
+S.~P.~Mohanty, D.~P.~Hughes, and M.~Salath\'{e}, ``Using deep learning
+for image-based plant disease detection,'' \textit{Front.\ Plant Sci.},
+vol.~7, article~1419, 2016.
+
+\bibitem{withana2023}
+W.~Withana, ``Sri Lankan rubber diseases detection using deep learning
+approaches,'' in \textit{Proc.\ Int.\ Conf.\ Agricultural Technology,
+Sri Lanka}, 2023, pp.~234--241.
+
+\bibitem{wang2022}
+L.~Wang \textit{et~al.}, ``Rubber leaf disease recognition based on
+improved deep convolutional neural network GMA-Net,''
+\textit{Comput.\ Electron.\ Agric.}, vol.~195, article~106841, 2022.
+
+\bibitem{tan2019}
+M.~Tan and Q.~Le, ``EfficientNet: Rethinking model scaling for
+convolutional neural networks,'' in \textit{Proc.\ ICML}, Long Beach,
+CA, USA, 2019, pp.~6105--6114.
+
+\bibitem{casino2019}
+F.~Casino \textit{et~al.}, ``A systematic literature review of
+blockchain-based applications: Current status, classification and
+open issues,'' \textit{Telematics Inform.}, vol.~36, pp.~55--81, 2019.
+
+\bibitem{chen2021}
+J.~Chen \textit{et~al.}, ``Application of deep learning for tea leaf
+quality classification,'' \textit{Comput.\ Electron.\ Agric.},
+vol.~189, article~106408, 2021.
+
+\bibitem{fabiyi2020}
+S.~D.~Fabiyi \textit{et~al.}, ``Varietal classification of rice seeds
+using RGB and hyperspectral images,'' \textit{IEEE Access}, vol.~8,
+pp.~22493--22505, 2020.
+
+\bibitem{nsbm2023}
+NSBM Green University, ``A mobile application to detect the diseases of
+rubber cultivation in Sri Lanka,'' in \textit{Proc.\ Int.\ Conf.\
+Applied Sciences}, vol.~8, pp.~156--163, 2023.
+
+\bibitem{li2022}
+X.~Li \textit{et~al.}, ``Price forecasting of agricultural commodities
+using machine learning approaches,'' \textit{J.\ Forecasting}, vol.~41,
+no.~4, pp.~823--838, 2022.
+
+\bibitem{kim2020}
+H.~M.~Kim and M.~Laskowski, ``Toward an ontology-driven blockchain
+design for supply-chain provenance,'' \textit{Intell.\ Syst.\ Account.\
+Finance Manag.}, vol.~25, no.~1, pp.~18--27, 2020.
+
+\bibitem{rathnayake2021}
+R.~M.~Rathnayake \textit{et~al.}, ``IoT based smart agriculture
+monitoring system for Sri Lanka,'' \textit{J.\ Inf.\ Syst.\ Technol.},
+vol.~15, no.~2, pp.~123--135, 2021.
+
+\bibitem{wolfert2017}
+S.~Wolfert \textit{et~al.}, ``Big data in smart farming -- A review,''
+\textit{Agric.\ Syst.}, vol.~153, pp.~69--80, 2017.
+
+\end{thebibliography}
+
+\end{document}

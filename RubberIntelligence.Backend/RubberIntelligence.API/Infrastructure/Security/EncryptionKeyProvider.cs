@@ -1,0 +1,212 @@
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.Extensions.Options;
+
+namespace RubberIntelligence.API.Infrastructure.Security
+{
+    /// <summary>
+    /// Central key-resolution service for all AES / HMAC keys used in the DPP pipeline.
+    ///
+    /// Resolution order (first non-null win):
+    ///   1. OS environment variable (injected by your deploy pipeline / Key Vault reference)
+    ///   2. IConfiguration value (appsettings section — suitable for dev overrides only)
+    ///   3. Compile-time fallback — ONLY permitted when ASPNETCORE_ENVIRONMENT == "Development".
+    ///      In any other environment the service throws at startup, forcing an explicit secret.
+    ///
+    /// Key-version tagging:
+    ///   Every encrypted value is prefixed "v{version}:" so that a future key-rotation can
+    ///   still decrypt old ciphertexts during the migration window.
+    /// </summary>
+    public sealed class EncryptionKeyProvider
+    {
+        // ── Internal fallback dev keys (intentionally weak and public — dev ONLY) ────
+        private const string DevFieldKey = "DevFieldEncryptKey256Bit!!!!!!!!"; // 32 chars
+        private const string DevFileKey  = "DevFileEncryptKey256Bit!!!!!!!!!"; // 32 chars
+        private const string DevHmacKey  = "DevHmacBlindIndexKey256Bit!!!!!!"; // 32 chars
+
+        private readonly byte[] _fieldKey;
+        private readonly byte[] _fileKey;
+        private readonly byte[] _hmacKey;
+        private readonly int    _keyVersion;
+        private readonly ILogger<EncryptionKeyProvider> _logger;
+        private readonly IWebHostEnvironment _env;
+        
+        // RSA-2048 key pair for AES key wrapping (lazy-loaded)
+        private RSA? _rsaProvider;
+
+        public int CurrentKeyVersion => _keyVersion;
+
+        public EncryptionKeyProvider(
+            IConfiguration config,
+            IWebHostEnvironment env,
+            IOptions<EncryptionKeyOptions> opts,
+            ILogger<EncryptionKeyProvider> logger)
+        {
+            _logger     = logger;
+            _env        = env;
+            _keyVersion = opts.Value.CurrentKeyVersion;
+
+            bool isDev = env.IsDevelopment();
+
+            _fieldKey = ResolveKey(
+                opts.Value.FieldKeyEnvVar,
+                opts.Value.FieldKeyConfigPath,
+                isDev ? DevFieldKey : null,
+                config, isDev, env.EnvironmentName,
+                "Field AES-256");
+
+            _fileKey = ResolveKey(
+                opts.Value.FileKeyEnvVar,
+                opts.Value.FileKeyConfigPath,
+                isDev ? DevFileKey : null,
+                config, isDev, env.EnvironmentName,
+                "File AES-256");
+
+            _hmacKey = ResolveKey(
+                opts.Value.HmacKeyEnvVar,
+                opts.Value.HmacKeyConfigPath,
+                isDev ? DevHmacKey : null,
+                config, isDev, env.EnvironmentName,
+                "HMAC Blind-Index");
+        }
+
+        /// <summary>Returns the AES-256 key for per-field encryption (32 bytes).</summary>
+        public byte[] GetFieldAesKey()  => _fieldKey;
+
+        /// <summary>Returns the AES-256 key for file-level encryption (32 bytes).</summary>
+        public byte[] GetFileAesKey()   => _fileKey;
+
+        /// <summary>Returns the HMAC key for blind-index generation (≥ 32 bytes).</summary>
+        public byte[] GetHmacKey()      => _hmacKey;
+
+        /// <summary>
+        /// Encrypts an AES key using RSA-2048 OAEP with SHA-256.
+        /// Returns Base64-encoded ciphertext for storage in DppDocument.EncryptedAesKey.
+        /// </summary>
+        public string EncryptAesKeyWithRsa(byte[] aesKey)
+        {
+            var rsa = GetOrCreateRsaProvider();
+            var encrypted = rsa.Encrypt(aesKey, RSAEncryptionPadding.OaepSHA256);
+            return Convert.ToBase64String(encrypted);
+        }
+
+        /// <summary>
+        /// Decrypts an RSA-encrypted AES key.
+        /// Used when admin/system needs to decrypt files with the master RSA private key.
+        /// </summary>
+        public byte[] DecryptAesKeyWithRsa(string encryptedAesKeyBase64)
+        {
+            var rsa = GetOrCreateRsaProvider();
+            var encryptedBytes = Convert.FromBase64String(encryptedAesKeyBase64);
+            return rsa.Decrypt(encryptedBytes, RSAEncryptionPadding.OaepSHA256);
+        }
+
+        /// <summary>
+        /// Lazy-loads or creates RSA-2048 provider for AES key wrapping.
+        /// The key pair is persisted to a PEM file so that encrypted documents
+        /// remain accessible across server restarts.
+        /// In production, load from Azure Key Vault or env var instead.
+        /// </summary>
+        private RSA GetOrCreateRsaProvider()
+        {
+            if (_rsaProvider != null)
+                return _rsaProvider;
+
+            // Resolve PEM file path: env var → App_Data default
+            var pemDir = Path.Combine(_env.ContentRootPath, "App_Data", "Keys");
+            Directory.CreateDirectory(pemDir);
+            var pemPath = Path.Combine(pemDir, "rsa_dpp_keypair.pem");
+
+            _rsaProvider = RSA.Create(2048);
+
+            if (File.Exists(pemPath))
+            {
+                // Load existing key pair from PEM file
+                var pem = File.ReadAllText(pemPath);
+                _rsaProvider.ImportFromPem(pem);
+                _logger.LogInformation(
+                    "[Security] RSA-2048 key pair loaded from {PemPath}", pemPath);
+            }
+            else
+            {
+                // First run: generate and persist the key pair
+                _rsaProvider = RSA.Create(2048);
+                var pem = _rsaProvider.ExportRSAPrivateKeyPem();
+                File.WriteAllText(pemPath, pem);
+
+                _logger.LogWarning(
+                    "[Security] RSA-2048 key pair generated and saved to {PemPath}. " +
+                    "This file contains the PRIVATE KEY — protect it accordingly. " +
+                    "In production, use Azure Key Vault instead of file-based keys.",
+                    pemPath);
+            }
+
+            if (_env.IsDevelopment())
+            {
+                _logger.LogWarning(
+                    "[Security][DEV] RSA key pair is file-based at {PemPath}. " +
+                    "Encrypted documents will survive restarts. " +
+                    "For production, migrate to Azure Key Vault.",
+                    pemPath);
+            }
+
+            return _rsaProvider;
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        private byte[] ResolveKey(
+            string envVar, string configPath,
+            string? devFallback,
+            IConfiguration config,
+            bool isDev, string envName,
+            string keyLabel)
+        {
+            // 1. Environment variable (highest priority — production path)
+            var raw = Environment.GetEnvironmentVariable(envVar);
+
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                // 2. IConfiguration (dev override in appsettings.Development.json etc.)
+                raw = config[configPath];
+            }
+
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                if (!isDev || devFallback == null)
+                {
+                    // Production with no key → hard fail at startup (safe by design)
+                    throw new InvalidOperationException(
+                        $"[Security] {keyLabel} key not found. " +
+                        $"Set '{envVar}' environment variable or configure '{configPath}' in appsettings. " +
+                        $"Environment: {envName}. " +
+                        $"In production, use Azure Key Vault or a secrets manager — " +
+                        $"never store keys in source-controlled files.");
+                }
+
+                // Development fallback — warn loudly
+                _logger.LogWarning(
+                    "[Security][DEV ONLY] {KeyLabel} key falling back to hardcoded dev key. " +
+                    "Set env var '{EnvVar}' before deploying to any non-development environment.",
+                    keyLabel, envVar);
+
+                raw = devFallback;
+            }
+
+            var keyBytes = Encoding.UTF8.GetBytes(raw);
+
+            if (keyBytes.Length < 32)
+                throw new InvalidOperationException(
+                    $"[Security] {keyLabel} key is too short ({keyBytes.Length} bytes). " +
+                    $"Minimum is 32 bytes (256 bits). Env var: '{envVar}'.");
+
+            // Exactly 32 bytes for AES-256 — truncate or pad would silently weaken the key,
+            // so we enforce the exact length contract instead.
+            if (keyLabel.Contains("AES") && keyBytes.Length != 32)
+                throw new InvalidOperationException(
+                    $"[Security] {keyLabel} key must be exactly 32 characters for AES-256. " +
+                    $"Got {keyBytes.Length} bytes. Env var: '{envVar}'.");
+
+            return keyBytes;
+        }
+    }
+}

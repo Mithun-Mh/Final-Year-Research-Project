@@ -1,0 +1,71 @@
+# ==========================================
+# Root .gitignore for Final Research Project
+# ==========================================
+
+# --- OS generated files ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# --- IDEs and Editors ---
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.idea/
+*.swp
+*~
+
+# --- .NET & C# ---
+**/[Bb]in/
+**/[Oo]bj/
+**/[Dd]ebug/
+**/[Rr]elease/
+*.dll
+*.pdb
+*.exe
+packages/
+*.nupkg
+TestResults/
+RubberIntelligence.Backend/**/bin/
+RubberIntelligence.Backend/**/obj/
+RubberIntelligence.Backend/**/Uploads/*
+!RubberIntelligence.Backend/**/Uploads/.gitkeep
+
+# --- Node.js & React Native (rubber-intelligence-app) ---
+**/node_modules/
+**/.expo/
+**/dist/
+**/web-build/
+expo-env.d.ts
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.tsbuildinfo
+.metro-health-check*
+rubber-intelligence-app/android/
+rubber-intelligence-app/ios/
+
+# --- Python (RubberIntelligence.Chatbot) ---
+**/__pycache__/
+**/*.py[cod]
+*$py.class
+**/venv/
+**/.venv/
+**/env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# --- Environment & Secret files ---
+.env
+.env*.local
+*.pem
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
